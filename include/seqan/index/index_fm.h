@@ -39,6 +39,8 @@
 #ifndef INDEX_FM_H
 #define INDEX_FM_H
 
+#include "divsufsort.hpp"
+
 namespace seqan {
 
 // ============================================================================
@@ -438,11 +440,32 @@ inline bool indexCreate(Index<TText, FMIndex<TSpec, TConfig> > & index, FibreSAL
     if (empty(text))
         return false;
 
+    uint64_t const textlen = lengthSum(text);
+    uint8_t* T = new uint8_t[textlen];
+    for (uint64_t pos = 0; pos < textlen; ++pos)
+        T[pos] = ordValue(text.concat[pos]);
+
+    std::cout << std::endl;
+//    std::cout << text.concat << std::endl;
+//    for (uint64_t i = 0; i < textlen; ++i)
+//        std::cout << (unsigned)T[i];
+//    std::cout << std::endl;
+
     TTempSA tempSA;
+
+    uint64_t* tempSA2 = new uint64_t[textlen];
+    sdsl::divsufsort((const unsigned char*)T, (int64_t*)tempSA2, (int64_t)textlen);
+    //sdsl::divsufsort(view, (int64_t*)tempSA2, (int64_t)textlen);
 
     // Create the full SA.
     resize(tempSA, lengthSum(text), Exact());
     createSuffixArray(tempSA, text, TAlgo());
+
+    for (uint64_t i = 0; i < length(tempSA); ++i)
+        std::cout << "i: " << tempSA[i] << std::endl;
+
+    for (uint64_t j = 0; j < textlen; ++j)
+        std::cout << "j: " << tempSA2[j] << std::endl;
 
     // Create the LF table.
     createLF(indexLF(index), text, tempSA);
