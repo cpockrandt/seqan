@@ -428,6 +428,68 @@ _findFirstIndex(Finder<Index<TText, FMIndex<TSpec, TConfig> >, TSpecFinder> & fi
 // ----------------------------------------------------------------------------
 
 template <typename TText, typename TSpec, typename TConfig>
+inline bool indexCreate(Index<TText, FMIndex<TSpec, TConfig> > & index, FibreSALF, bool /* libdivsufsort */)
+{
+    typedef Index<TText, FMIndex<TSpec, TConfig> >               TIndex;
+    typedef typename Fibre<TIndex, FibreTempSA>::Type            TTempSA;
+    typedef typename Size<TIndex>::Type                          TSize;
+//    typedef typename DefaultIndexCreator<TIndex, FibreSA>::Type  TAlgo;
+    typedef typename Value<TTempSA>::Type                        TSAValue;
+
+    TText const & text = indexText(index);
+
+    if (empty(text))
+        return false;
+
+//    std::cout << std::endl;
+//    std::cout << text.concat << std::endl;
+
+    uint64_t const textlen = lengthSum(text);
+    uint64_t* tempSA2 = new uint64_t[textlen];
+    sdsl::divsufsort((const unsigned char*)text.concat.data_begin, (int64_t*)tempSA2, (int64_t)textlen);
+
+    // Create the full SA.
+    TTempSA tempSA;
+    resize(tempSA, textlen, Exact());
+    for (uint64_t i = 0; i < textlen; ++i)
+    {
+        TSAValue pos;
+        posLocalize(pos, tempSA2[i], stringSetLimits(text));
+//        std::cout << "j: " << pos << std::endl;
+        assignValue(tempSA, i, pos);
+    }
+
+//    std::cout << "------------------------\n";
+//    createSuffixArray(tempSA, text, TAlgo());
+
+//    for (uint64_t i = 0; i < length(tempSA); ++i)
+//        std::cout << "i: " << tempSA[i] << std::endl;
+
+
+
+//    ModifiedString<const std::remove_reference_t<decltype(text.concat)>, ModView<FunctorOrd<Dna> > >  view(text.concat);
+//    std::cout << text.concat << std::endl;
+//    for (uint64_t i = 0; i < textlen; ++i)
+//        std::cout << (unsigned)T[i];
+//    std::cout << std::endl;
+
+//    for (uint64_t j = 0; j < textlen; ++j)
+//        std::cout << "j: " << tempSA2[j] << std::endl;
+
+    // Create the LF table.
+    createLF(indexLF(index), text, tempSA);
+
+    // Set the FMIndex LF as the CompressedSA LF.
+    setFibre(indexSA(index), indexLF(index), FibreLF());
+
+    // Create the compressed SA.
+    TSize numSentinel = countSequences(text);
+    createCompressedSa(indexSA(index), tempSA, numSentinel);
+
+    return true;
+}
+
+template <typename TText, typename TSpec, typename TConfig>
 inline bool indexCreate(Index<TText, FMIndex<TSpec, TConfig> > & index, FibreSALF)
 {
     typedef Index<TText, FMIndex<TSpec, TConfig> >               TIndex;
@@ -440,32 +502,10 @@ inline bool indexCreate(Index<TText, FMIndex<TSpec, TConfig> > & index, FibreSAL
     if (empty(text))
         return false;
 
-    uint64_t const textlen = lengthSum(text);
-    uint8_t* T = new uint8_t[textlen];
-    for (uint64_t pos = 0; pos < textlen; ++pos)
-        T[pos] = ordValue(text.concat[pos]);
-
-    std::cout << std::endl;
-//    std::cout << text.concat << std::endl;
-//    for (uint64_t i = 0; i < textlen; ++i)
-//        std::cout << (unsigned)T[i];
-//    std::cout << std::endl;
-
-    TTempSA tempSA;
-
-    uint64_t* tempSA2 = new uint64_t[textlen];
-    sdsl::divsufsort((const unsigned char*)T, (int64_t*)tempSA2, (int64_t)textlen);
-    //sdsl::divsufsort(view, (int64_t*)tempSA2, (int64_t)textlen);
-
     // Create the full SA.
+    TTempSA tempSA;
     resize(tempSA, lengthSum(text), Exact());
     createSuffixArray(tempSA, text, TAlgo());
-
-    for (uint64_t i = 0; i < length(tempSA); ++i)
-        std::cout << "i: " << tempSA[i] << std::endl;
-
-    for (uint64_t j = 0; j < textlen; ++j)
-        std::cout << "j: " << tempSA2[j] << std::endl;
 
     // Create the LF table.
     createLF(indexLF(index), text, tempSA);

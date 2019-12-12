@@ -293,6 +293,40 @@ struct FunctorComplement<Iupac> : public std::unary_function<Iupac,Iupac>
 };
 
 
+// --------------------------------------------------------------------------
+// Class FunctorOrd
+// --------------------------------------------------------------------------
+
+/*!
+ * @class FunctorOrd
+ * @headerfile <seqan/modifier.h>
+ * @brief Functor that returns the ordValue for a given character.
+ *
+ * @signature template <typename TInType[, typename TResult]>
+ *            struct FunctorOrd;
+ *
+ * @tparam TInType The parameter/input type.
+ * @tparam TResult The return/result type, defaults to TInType.
+ *
+ *
+ * @fn FunctorOrd::operator()
+ * @brief Function call operator.
+ * @signature TResult FunctorOrd::operator()(in);
+ *
+ * @param[in] in The value to convert (<tt>in</tt>).
+ *
+ * @return TResult The converted value (<tt>TResult</tt>).
+ */
+
+template <typename InType>
+struct FunctorOrd : public std::unary_function<InType, uint8_t>
+{
+    inline uint8_t operator()(InType x) const
+    {
+        return ordValue(x);
+    }
+};
+
 }  // namespace seqan
 
 #endif  // SEQAN_MODIFIER_MODIFIER_FUNCTORS_H_

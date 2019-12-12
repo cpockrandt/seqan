@@ -210,9 +210,9 @@ inline saidx_t ss_isqrt(saidx_t x) {
 #endif /* SS_BLOCKSIZE != 0 */
 
 /* Compares two suffixes. */
-template <typename saidx_t>
-inline int32_t ss_compare(const uint8_t *T, const saidx_t *p1, const saidx_t *p2, saidx_t depth) {
-  const uint8_t *U1, *U2, *U1n, *U2n;
+template <typename text_t, typename saidx_t>
+inline int32_t ss_compare(const text_t *T, const saidx_t *p1, const saidx_t *p2, saidx_t depth) {
+  const text_t *U1, *U2, *U1n, *U2n;
 
   for(U1 = T + depth + *p1,
       U2 = T + depth + *p2,
@@ -230,8 +230,8 @@ inline int32_t ss_compare(const uint8_t *T, const saidx_t *p1, const saidx_t *p2
 #if (SS_BLOCKSIZE != 1) && (SS_INSERTIONSORT_THRESHOLD != 1)
 
 /* Insertionsort for small size groups */
-template <typename saidx_t>
-inline void ss_insertionsort(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *last, saidx_t depth) {
+template <typename text_t, typename saidx_t>
+inline void ss_insertionsort(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *last, saidx_t depth) {
   saidx_t *i, *j;
   saidx_t t;
   int32_t r;
@@ -250,8 +250,8 @@ inline void ss_insertionsort(const uint8_t *T, const saidx_t *PA, saidx_t *first
 
 #if (SS_BLOCKSIZE == 0) || (SS_INSERTIONSORT_THRESHOLD < SS_BLOCKSIZE)
 
-template <typename saidx_t>
-inline void ss_fixdown(const uint8_t *Td, const saidx_t *PA, saidx_t *SA, saidx_t i, saidx_t size) {
+template <typename text_t, typename saidx_t>
+inline void ss_fixdown(const text_t *Td, const saidx_t *PA, saidx_t *SA, saidx_t i, saidx_t size) {
   saidx_t j, k;
   saidx_t v;
   int32_t c, d, e;
@@ -265,8 +265,8 @@ inline void ss_fixdown(const uint8_t *Td, const saidx_t *PA, saidx_t *SA, saidx_
 }
 
 /* Simple top-down heapsort. */
-template <typename saidx_t>
-inline void ss_heapsort(const uint8_t *Td, const saidx_t *PA, saidx_t *SA, saidx_t size) {
+template <typename text_t, typename saidx_t>
+inline void ss_heapsort(const text_t *Td, const saidx_t *PA, saidx_t *SA, saidx_t size) {
   saidx_t i, m;
   saidx_t t;
 
@@ -286,8 +286,8 @@ inline void ss_heapsort(const uint8_t *Td, const saidx_t *PA, saidx_t *SA, saidx
 }
 
 /* Returns the median of three elements. */
-template <typename saidx_t>
-inline saidx_t * ss_median3(const uint8_t *Td, const saidx_t *PA, saidx_t *v1, saidx_t *v2, saidx_t *v3) {
+template <typename text_t, typename saidx_t>
+inline saidx_t * ss_median3(const text_t *Td, const saidx_t *PA, saidx_t *v1, saidx_t *v2, saidx_t *v3) {
   if(Td[PA[*v1]] > Td[PA[*v2]]) { std::swap(v1, v2); }
   if(Td[PA[*v2]] > Td[PA[*v3]]) {
     if(Td[PA[*v1]] > Td[PA[*v3]]) { return v1; }
@@ -297,8 +297,8 @@ inline saidx_t * ss_median3(const uint8_t *Td, const saidx_t *PA, saidx_t *v1, s
 }
 
 /* Returns the median of five elements. */
-template <typename saidx_t>
-inline saidx_t * ss_median5(const uint8_t *Td, const saidx_t *PA,
+template <typename text_t, typename saidx_t>
+inline saidx_t * ss_median5(const text_t *Td, const saidx_t *PA,
                             saidx_t *v1, saidx_t *v2, saidx_t *v3, saidx_t *v4, saidx_t *v5) {
   if(Td[PA[*v2]] > Td[PA[*v3]]) { std::swap(v2, v3); }
   if(Td[PA[*v4]] > Td[PA[*v5]]) { std::swap(v4, v5); }
@@ -310,8 +310,8 @@ inline saidx_t * ss_median5(const uint8_t *Td, const saidx_t *PA,
 }
 
 /* Returns the pivot element. */
-template <typename saidx_t>
-inline saidx_t * ss_pivot(const uint8_t *Td, const saidx_t *PA, saidx_t *first, saidx_t *last) {
+template <typename text_t, typename saidx_t>
+inline saidx_t * ss_pivot(const text_t *Td, const saidx_t *PA, saidx_t *first, saidx_t *last) {
   saidx_t *middle;
   saidx_t t;
 
@@ -351,10 +351,10 @@ inline saidx_t * ss_partition(const saidx_t *PA, saidx_t *first, saidx_t *last, 
 }
 
 /* Multikey introsort for medium size groups. */
-template <typename saidx_t>
-inline void ss_mintrosort(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *last, saidx_t depth) {
+template <typename text_t, typename saidx_t>
+inline void ss_mintrosort(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *last, saidx_t depth) {
   struct { saidx_t *a, *b, c; int32_t d; } stack[SS_MISORT_STACKSIZE];
-  const uint8_t *Td;
+  const text_t *Td;
   saidx_t *a, *b, *c, *d, *e, *f;
   saidx_t s, t;
   int32_t ssize;
@@ -530,8 +530,8 @@ inline void ss_rotate(saidx_t *first, saidx_t *middle, saidx_t *last) {
   }
 }
 
-template <typename saidx_t>
-inline void ss_inplacemerge(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
+template <typename text_t, typename saidx_t>
+inline void ss_inplacemerge(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
                             saidx_t depth) {
   const saidx_t *p;
   saidx_t *a, *b;
@@ -568,8 +568,8 @@ inline void ss_inplacemerge(const uint8_t *T, const saidx_t *PA, saidx_t *first,
 }
 
 /* Merge-forward with internal buffer. */
-template <typename saidx_t>
-inline void ss_mergeforward(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
+template <typename text_t, typename saidx_t>
+inline void ss_mergeforward(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
                             saidx_t *buf, saidx_t depth) {
   saidx_t *a, *b, *c, *bufend;
   saidx_t t;
@@ -616,8 +616,8 @@ inline void ss_mergeforward(const uint8_t *T, const saidx_t *PA, saidx_t *first,
 }
 
 /* Merge-backward with internal buffer. */
-template <typename saidx_t>
-inline void ss_mergebackward(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
+template <typename text_t, typename saidx_t>
+inline void ss_mergebackward(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
                              saidx_t *buf, saidx_t depth) {
   const saidx_t *p1, *p2;
   saidx_t *a, *b, *c, *bufend;
@@ -673,8 +673,8 @@ inline void ss_mergebackward(const uint8_t *T, const saidx_t *PA, saidx_t *first
 }
 
 /* D&C based merge. */
-template <typename saidx_t>
-inline void ss_swapmerge(const uint8_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
+template <typename text_t, typename saidx_t>
+inline void ss_swapmerge(const text_t *T, const saidx_t *PA, saidx_t *first, saidx_t *middle, saidx_t *last,
                          saidx_t *buf, saidx_t bufsize, saidx_t depth) {
 #define GETIDX(a) ((0 <= (a)) ? (a) : (~(a)))
 #define MERGE_CHECK(a, b, c)\
@@ -760,9 +760,9 @@ inline void ss_swapmerge(const uint8_t *T, const saidx_t *PA, saidx_t *first, sa
 /*- Function -*/
 
 /* Substring sort */
-template <typename saidx_t>
+template <typename text_t, typename saidx_t>
 void
-sssort(const uint8_t *T, const saidx_t *PA,
+sssort(const text_t *T, const saidx_t *PA,
        saidx_t *first, saidx_t *last,
        saidx_t *buf, saidx_t bufsize,
        saidx_t depth, saidx_t n, int32_t lastsuffix) {
@@ -1339,8 +1339,8 @@ inline void trsort(saidx_t *ISA, saidx_t *SA, saidx_t n, saidx_t depth) {
 }
 
 /* Sorts suffixes of type B*. */
-template <typename saidx_t>
-inline saidx_t sort_typeBstar(const uint8_t *T, saidx_t *SA, saidx_t *bucket_A, saidx_t *bucket_B, saidx_t n) {
+template <typename text_t, typename saidx_t>
+inline saidx_t sort_typeBstar(const text_t *T, saidx_t *SA, saidx_t *bucket_A, saidx_t *bucket_B, saidx_t n) {
   saidx_t *PAb, *ISAb, *buf;
 #ifdef _OPENMP
   saidx_t *curbuf;
@@ -1493,8 +1493,8 @@ note:
 }
 
 /* Constructs the suffix array by using the sorted order of type B* suffixes. */
-template <typename saidx_t>
-inline void construct_SA(const uint8_t *T, saidx_t *SA, saidx_t *bucket_A, saidx_t *bucket_B, saidx_t n, saidx_t m) {
+template <typename text_t, typename saidx_t>
+inline void construct_SA(const text_t *T, saidx_t *SA, saidx_t *bucket_A, saidx_t *bucket_B, saidx_t n, saidx_t m) {
   saidx_t *i, *j, *k;
   saidx_t s;
   int32_t c0, c1, c2;
@@ -1552,9 +1552,9 @@ inline void construct_SA(const uint8_t *T, saidx_t *SA, saidx_t *bucket_A, saidx
   }
 }
 
-template <typename saidx_t>
+template <typename text_t, typename saidx_t>
 int32_t
-divsufsort(const uint8_t *T, saidx_t *SA, saidx_t n) {
+divsufsort(const text_t *T, saidx_t *SA, saidx_t n) {
   saidx_t *bucket_A, *bucket_B;
   saidx_t m;
   int32_t err = 0;
